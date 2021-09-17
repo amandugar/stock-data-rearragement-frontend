@@ -3,9 +3,12 @@ import Deque from 'double-ended-queue'
 import { useState } from 'react'
 import DetailsTable from './DetailsTable'
 import date from 'date-and-time'
+import { CSVLink } from 'react-csv'
+import headers from '../constants/headers'
 
 const UploadPage = () => {
   const [stockData, setStockData] = useState(null)
+  const [fileName, setFileName] = useState('')
 
   const addToArray = (finalArray, currSale, currPurchase, qty) => {
     console.log({
@@ -47,19 +50,47 @@ const UploadPage = () => {
     if (isNaN(end)) {
       end = date.parse(currSale['Date'], 'D-MM-YYYY')
     }
+
     const difference =
       Math.abs(new Date(end).getTime() - new Date(start).getTime()) /
       (1000 * 3600 * 24)
+
     let temp = {
       Scripcd: currPurchase['Scripcd'],
       ScripName: currPurchase['Scrip Name'],
-      purchaseDate: currPurchase['Date'],
-      saleDate: currSale['Date'],
+      purchaseDate: currPurchase['Date'].replaceAll('-', '/'),
+      saleDate: currSale['Date'].replaceAll('-', '/'),
       qty,
-      purchaseAmount: currPurchase['Buy Net Rate'],
-      saleAmount: currSale['Sale Net Rate'],
-      LongTerm: difference > 365 ? 'YES' : '-',
-      ShortTerm: difference <= 365 ? 'YES' : '-',
+      purchaseAmount:
+        Math.round(
+          parseInt(qty) *
+            parseFloat(currPurchase['Buy Net Rate'].replace(',', '')) *
+            100
+        ) / 100,
+      saleAmount:
+        Math.round(
+          parseInt(qty) *
+            parseFloat(currSale['Sale Net Rate'].replace(',', '')) *
+            100
+        ) / 100,
+      LongTerm:
+        difference > 365
+          ? Math.round(
+              parseFloat(qty) *
+                (parseFloat(currSale['Sale Net Rate'].replace(',', '')) -
+                  parseFloat(currPurchase['Buy Net Rate'].replace(',', ''))) *
+                100
+            ) / 100
+          : '-',
+      ShortTerm:
+        difference <= 365
+          ? Math.round(
+              parseFloat(qty) *
+                (parseFloat(currSale['Sale Net Rate'].replace(',', '')) -
+                  parseFloat(currPurchase['Buy Net Rate'].replace(',', ''))) *
+                100
+            ) / 100
+          : '-',
     }
 
     finalArray.push(temp)
@@ -144,12 +175,50 @@ const UploadPage = () => {
   return (
     <>
       <div className="container m-auto flex-col items-center flex justify-center">
-        <form onSubmit={eventHandler}>
-          <input type="file" accept=".csv" />
-          <button className="bg-gray-200 p-2 rounded">Submit</button>
+        <form onSubmit={eventHandler} className="my-6 mx-4">
+          <label
+            htmlFor="file-upload"
+            className="bg-blue-200 py-2 px-4 rounded-sm"
+          >
+            Custom Upload
+          </label>
+          <input
+            onChange={e => setFileName(e.target.files[0].name)}
+            id="file-upload"
+            className="bg-transparent hidden text-gray-200"
+            type="file"
+            accept=".csv"
+          />
+          <span className="text-base pl-7 pr-6 font-bold text-black">
+            {fileName}
+          </span>
+          {fileName !== '' && (
+            <button
+              className="py-2 px-4 rounded-sm text-black bg-yellow-400"
+              type="submit"
+            >
+              Submit
+            </button>
+          )}
         </form>
       </div>
       <DetailsTable stockData={stockData} />
+      {stockData && (
+        <>
+          {console.log(stockData)}
+          <div className="flex items-center justify-center flex-row my-8">
+            <CSVLink
+              data={stockData}
+              filename={'Stock List.csv'}
+              enclosingCharacter={``}
+              headers={headers}
+              className="bg-indigo-600 text-white py-2 px-4 rouded-sm"
+            >
+              Downlaod File
+            </CSVLink>
+          </div>
+        </>
+      )}
     </>
   )
 }
