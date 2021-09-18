@@ -211,7 +211,7 @@ const UploadPage = () => {
             <CSVLink
               data={stockData}
               filename={'Stock List.csv'}
-              enclosingCharacter={` `}
+              enclosingCharacter={`    `}
               headers={headers}
               className="bg-indigo-600 text-white py-2 px-4 rouded-sm"
             >
