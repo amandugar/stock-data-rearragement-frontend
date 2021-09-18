@@ -1,3 +1,5 @@
+import SheetHeaders from '../constants/SheetHeaders'
+
 const PointsToRemeber = () => {
   return (
     <div className="container m-auto items-left justify-center flex flex-col py-8">
@@ -13,6 +15,17 @@ const PointsToRemeber = () => {
             <li className="font-normal">Save file as CSV UTF-8</li>
           </ul>
         </li>
+        <li className="font-bold">
+          Check Column Names Should be
+          <ul className="list-inside list-decimal ml-10">
+            {SheetHeaders.map((table, index) => (
+              <li key={index} className="font-normal">
+                {table}
+              </li>
+            ))}
+          </ul>
+        </li>
+        <li className="font-bold">Remove all the Unwanted Data</li>
         <li className="font-bold">Upload File and Click Submit</li>
       </ul>
     </div>

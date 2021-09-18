@@ -11,11 +11,6 @@ const UploadPage = () => {
   const [fileName, setFileName] = useState('')
 
   const addToArray = (finalArray, currSale, currPurchase, qty) => {
-    console.log({
-      currPurchase,
-      currSale,
-    })
-
     if (currPurchase['Date'].toString().search('/') >= 0) {
       let currPurchaseArr = currPurchase['Date'].toString().split('/')
       let temp = currPurchaseArr[0]
@@ -100,9 +95,12 @@ const UploadPage = () => {
     let purchase = new Deque([])
     let sale = new Deque([])
     for (let i = start; i < end; i++) {
-      if (array[i]['Buy Qty'] !== '-') {
+      if (array[i]['Buy Qty'] !== '-' && parseInt(array[i]['Buy Qty']) !== 0) {
         purchase.push(array[i])
-      } else if (array[i]['Sale Qty'] !== '-') {
+      } else if (
+        array[i]['Sale Qty'] !== '-' &&
+        parseInt(array[i]['Sale Qty']) !== 0
+      ) {
         sale.push(array[i])
       }
     }
@@ -112,6 +110,7 @@ const UploadPage = () => {
       let currPurchase = purchase.peekFront()
       purchase.shift()
       sale.shift()
+      console.log({ currSale, currPurchase })
       if (
         parseInt(currSale['Sale Qty']) === parseInt(currPurchase['Buy Qty'])
       ) {
@@ -154,6 +153,7 @@ const UploadPage = () => {
     indicesArray.forEach(element => {
       insertToArray(array, finalArray, element.start, element.end)
     })
+
     setStockData(finalArray)
   }
 
@@ -167,6 +167,7 @@ const UploadPage = () => {
           results = JSON.parse(
             JSON.stringify(results.data).replace(/"\s+|\s+"/g, '"')
           )
+          console.log(results)
           getData(results)
         },
       })
